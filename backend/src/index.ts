@@ -15,8 +15,8 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: '*', // In production, replace with frontend URL
-        methods: ['GET', 'POST']
+        origin: "*",
+        methods: ["GET", "POST"]
     }
 });
 
