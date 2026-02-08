@@ -26,14 +26,18 @@ export const useSocket = (roomCode: string) => {
         if (!user || !roomCode) return;
 
         const newSocket = io(SOCKET_URL, {
-            transports: ['websocket'],
+            transports: ['polling', 'websocket'], // Allow polling as fallback
         });
 
-        newSocket.emit('join_room', { roomCode, user });
+        newSocket.on('connect', () => {
+            console.log('Socket connected/reconnected:', newSocket.id);
+            newSocket.emit('join_room', { roomCode, user });
+        });
 
         setSocket(newSocket);
 
         return () => {
+            newSocket.off('connect');
             newSocket.disconnect();
         };
     }, [roomCode, user]);

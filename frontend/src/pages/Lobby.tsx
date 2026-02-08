@@ -26,6 +26,10 @@ const Lobby = () => {
             try {
                 const res = await api.get(`/rooms/${code}`);
                 setPlayers(res.data.players);
+                if (res.data.status === 'PLAYING') {
+                    navigate(`/game/${code}`);
+                    return;
+                }
                 if (res.data.hostId._id === user?.id || res.data.hostId === user?.id) {
                     setIsHost(true);
                 }
@@ -53,6 +57,8 @@ const Lobby = () => {
         });
 
         socket.on('game_started', () => {
+            console.log('Game started event received');
+            // alert('Game is starting!'); // Optional debug
             navigate(`/game/${code}`);
         });
 

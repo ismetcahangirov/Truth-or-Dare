@@ -78,6 +78,7 @@ export const socketHandler = (io: Server) => {
                 if (room) {
                     room.status = 'PLAYING';
                     await room.save();
+                    console.log(`Game starting for room: ${roomCode}. Emitting game_started to all.`);
                     io.to(roomCode).emit('game_started');
                 }
             } catch (error) {

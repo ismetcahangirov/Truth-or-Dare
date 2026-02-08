@@ -17,9 +17,6 @@ const Login = () => {
             login(res.data.user, res.data.token);
             navigate('/');
         } catch (err: any) {
-            console.error('Login error:', err);
-            const actualBaseURL = api.defaults.baseURL;
-            alert(`Login Failed!\nActual API URL: ${actualBaseURL}\nError: ${err.message}\nStatus: ${err.response?.status}\nData: ${JSON.stringify(err.response?.data)}`);
             setError(err.response?.data?.message || 'Login failed');
         }
     };

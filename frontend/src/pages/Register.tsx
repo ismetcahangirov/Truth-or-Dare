@@ -18,9 +18,6 @@ const Register = () => {
             login(res.data.user, res.data.token);
             navigate('/');
         } catch (err: any) {
-            console.error('Registration error:', err);
-            const actualBaseURL = api.defaults.baseURL;
-            alert(`Registration Failed!\nActual API URL: ${actualBaseURL}\nError: ${err.message}\nStatus: ${err.response?.status}\nData: ${JSON.stringify(err.response?.data)}`);
             setError(err.response?.data?.message || 'Registration failed');
         }
     };
