@@ -18,6 +18,9 @@ const Register = () => {
             login(res.data.user, res.data.token);
             navigate('/');
         } catch (err: any) {
+            console.error('Registration error:', err);
+            const apiBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+            alert(`Registration Failed!\nAPI URL: ${apiBaseURL}\nError: ${err.message}\nMessage: ${err.response?.data?.message}`);
             setError(err.response?.data?.message || 'Registration failed');
         }
     };
