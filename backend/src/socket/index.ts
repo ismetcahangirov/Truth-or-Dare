@@ -201,19 +201,17 @@ export const socketHandler = (io: Server) => {
 
                     if (session.completedVotes.size > session.incompleteVotes.size) {
                         result = 'complete';
-                    } else if (session.incompleteVotes.size > session.incompleteVotes.size) {
+                    } else if (session.incompleteVotes.size > session.completedVotes.size) {
                         result = 'incomplete';
                     } else {
                         // Tie - random
                         result = Math.random() > 0.5 ? 'complete' : 'incomplete';
                     }
 
-                    // Award points if completed
-                    if (result === 'complete') {
-                        session.completedVotes.forEach(voterId => {
-                            const currentScore = session!.playerScores.get(voterId) || 0;
-                            session!.playerScores.set(voterId, currentScore + 1);
-                        });
+                    // Award points if completed to the TARGET player
+                    if (result === 'complete' && session.targetPlayerId) {
+                        const currentScore = session.playerScores.get(session.targetPlayerId) || 0;
+                        session!.playerScores.set(session.targetPlayerId, currentScore + 1);
                     }
 
                     // Send updated scores
