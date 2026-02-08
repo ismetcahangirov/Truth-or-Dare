@@ -2,10 +2,21 @@ import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuthStore } from '../store/authStore';
 
-const isLocal = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
-const prodSocketURL = 'https://truth-or-dare-xoo4.onrender.com';
+const getSocketURL = () => {
+    if (typeof window === 'undefined') return 'http://localhost:5000';
 
-const SOCKET_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || (isLocal ? 'http://localhost:5000' : prodSocketURL);
+    const hostname = window.location.hostname;
+    const isLocal = hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.');
+    const isVercel = hostname.includes('vercel.app');
+
+    if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL.replace('/api', '');
+    if (isVercel) return 'https://truth-or-dare-xoo4.onrender.com';
+    if (isLocal) return 'http://localhost:5000';
+
+    return 'https://truth-or-dare-xoo4.onrender.com';
+};
+
+const SOCKET_URL = getSocketURL();
 
 export const useSocket = (roomCode: string) => {
     const [socket, setSocket] = useState<Socket | null>(null);
