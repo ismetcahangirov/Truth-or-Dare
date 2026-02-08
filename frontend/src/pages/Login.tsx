@@ -18,8 +18,8 @@ const Login = () => {
             navigate('/');
         } catch (err: any) {
             console.error('Login error:', err);
-            const apiBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            alert(`Login Failed!\nAPI URL: ${apiBaseURL}\nError: ${err.message}\nMessage: ${err.response?.data?.message}`);
+            const actualBaseURL = api.defaults.baseURL;
+            alert(`Login Failed!\nActual API URL: ${actualBaseURL}\nError: ${err.message}\nStatus: ${err.response?.status}\nData: ${JSON.stringify(err.response?.data)}`);
             setError(err.response?.data?.message || 'Login failed');
         }
     };

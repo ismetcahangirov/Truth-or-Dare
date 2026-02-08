@@ -19,8 +19,8 @@ const Register = () => {
             navigate('/');
         } catch (err: any) {
             console.error('Registration error:', err);
-            const apiBaseURL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-            alert(`Registration Failed!\nAPI URL: ${apiBaseURL}\nError: ${err.message}\nMessage: ${err.response?.data?.message}`);
+            const actualBaseURL = api.defaults.baseURL;
+            alert(`Registration Failed!\nActual API URL: ${actualBaseURL}\nError: ${err.message}\nStatus: ${err.response?.status}\nData: ${JSON.stringify(err.response?.data)}`);
             setError(err.response?.data?.message || 'Registration failed');
         }
     };
