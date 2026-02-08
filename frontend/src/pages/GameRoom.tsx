@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket.ts';
 import { useAuthStore } from '../store/authStore.ts';
+import api from '../services/api.ts';
 import Bottle from '../components/game/Bottle.tsx';
 import Coin from '../components/game/Coin.tsx';
 import TaskModal from '../components/game/TaskModal.tsx';
@@ -15,14 +16,9 @@ const GameRoom = () => {
         const fetchRoom = async () => {
             try {
                 if (!code) return;
-                const res = await fetch(`http://localhost:5000/api/rooms/${code}`, {
-                    headers: {
-                        'Authorization': `Bearer ${useAuthStore.getState().token}`
-                    }
-                });
-                const data = await res.json();
-                if (data.players) {
-                    setPlayers(data.players);
+                const res = await api.get(`/rooms/${code}`);
+                if (res.data.players) {
+                    setPlayers(res.data.players);
                 }
             } catch (err) {
                 console.error("Failed to fetch room:", err);
