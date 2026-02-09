@@ -108,13 +108,7 @@ const GameRoom = () => {
                 setCoinSide(side);
                 setTimeout(() => {
                     setShowCoin(false);
-                    // Initialize task session on backend
-                    socket.emit('init_task_session', {
-                        roomCode: code,
-                        targetPlayerId: selectedPlayerId,
-                        targetPlayerName: selectedPlayer,
-                        taskType: type
-                    });
+                    // Backend now initializes session automatically - no need for init_task_session
                     // Show question input for non-target players
                     if (currentUser?.id !== selectedPlayerId) {
                         setShowQuestionInput(true);

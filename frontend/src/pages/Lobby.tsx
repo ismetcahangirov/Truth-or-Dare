@@ -74,6 +74,13 @@ const Lobby = () => {
         }
     };
 
+    const handleLeaveRoom = () => {
+        if (socket && user?.id) {
+            socket.emit('leave_room', { roomCode: code, userId: user.id });
+            navigate('/');
+        }
+    };
+
     if (loading) return <div className="text-white p-10">Loading Lobby...</div>;
 
     return (
@@ -83,8 +90,16 @@ const Lobby = () => {
                     <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
                         Lobby: <span className="tracking-widest font-mono">{code}</span>
                     </h1>
-                    <div className="text-gray-400">
-                        Players: {players.length} / 8
+                    <div className="flex items-center gap-4">
+                        <div className="text-gray-400">
+                            Players: {players.length} / 8
+                        </div>
+                        <button
+                            onClick={handleLeaveRoom}
+                            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-bold transition-colors shadow-lg"
+                        >
+                            Exit
+                        </button>
                     </div>
                 </div>
 

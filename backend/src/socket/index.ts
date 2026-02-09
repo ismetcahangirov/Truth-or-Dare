@@ -114,6 +114,10 @@ export const socketHandler = (io: Server) => {
                 const targetPlayer = room.players[targetIndex];
                 session.playersWhoHadBottle.add(targetPlayer.userId.toString());
 
+                // Set target player in session (backend is source of truth)
+                session.targetPlayerId = targetPlayer.userId.toString();
+                session.targetPlayerName = targetPlayer.name;
+
                 const segmentAngle = 360 / playerCount;
                 const targetAngle = targetIndex * segmentAngle;
                 const finalAngle = 1440 + targetAngle + 90;
@@ -131,6 +135,16 @@ export const socketHandler = (io: Server) => {
         socket.on('coin_flip_request', ({ roomCode }) => {
             const side = Math.random() > 0.5 ? 'heads' : 'tails';
             const taskType: 'TRUTH' | 'DARE' = side === 'heads' ? 'TRUTH' : 'DARE';
+
+            // Initialize session on backend automatically
+            const session = gameSessions.get(roomCode);
+            if (session) {
+                session.taskType = taskType;
+                session.questions = [];
+                session.selectedQuestion = null;
+                session.completedVotes.clear();
+                session.incompleteVotes.clear();
+            }
 
             io.to(roomCode).emit('coin_flip_result', { side, taskType });
         });
@@ -195,10 +209,16 @@ export const socketHandler = (io: Server) => {
                     required
                 });
 
-                // If all players (except target) voted
-                if (totalVotes >= required) {
-                    let result: 'complete' | 'incomplete';
+                // Early majority exit: Check if we have a majority
+                const majority = Math.ceil(required / 2);
+                let result: 'complete' | 'incomplete' | null = null;
 
+                if (session.completedVotes.size > majority) {
+                    result = 'complete';
+                } else if (session.incompleteVotes.size > majority) {
+                    result = 'incomplete';
+                } else if (totalVotes >= required) {
+                    // All votes are in, determine final result
                     if (session.completedVotes.size > session.incompleteVotes.size) {
                         result = 'complete';
                     } else if (session.incompleteVotes.size > session.completedVotes.size) {
@@ -207,8 +227,11 @@ export const socketHandler = (io: Server) => {
                         // Tie - random
                         result = Math.random() > 0.5 ? 'complete' : 'incomplete';
                     }
+                }
 
-                    // Award points if completed to the TARGET player
+                // If we have a result, process it
+                if (result) {
+                    // Award points if completed to the TARGET player ONLY
                     if (result === 'complete' && session.targetPlayerId) {
                         const currentScore = session.playerScores.get(session.targetPlayerId) || 0;
                         session!.playerScores.set(session.targetPlayerId, currentScore + 1);
@@ -240,9 +263,16 @@ export const socketHandler = (io: Server) => {
         socket.on('init_task_session', ({ roomCode, targetPlayerId, targetPlayerName, taskType }) => {
             let session = gameSessions.get(roomCode);
             if (session) {
-                session.targetPlayerId = targetPlayerId;
-                session.targetPlayerName = targetPlayerName;
-                session.taskType = taskType;
+                // Only update if not already set by backend (backward compatibility)
+                if (!session.targetPlayerId) {
+                    session.targetPlayerId = targetPlayerId;
+                }
+                if (!session.targetPlayerName) {
+                    session.targetPlayerName = targetPlayerName;
+                }
+                if (!session.taskType) {
+                    session.taskType = taskType;
+                }
                 session.questions = [];
                 session.selectedQuestion = null;
                 session.completedVotes.clear();
